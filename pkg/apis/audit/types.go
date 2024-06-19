@@ -99,3 +99,19 @@ type AuditBackendSplunk struct {
 	// TlsHost is the hostname that fluent-bit should request through SNI when connecting to a site that serves different hostnames under one IP.
 	TlsHost string
 }
+
+type AuditBackendLoki struct {
+	// Enabled allows to turn this backend on.
+	Enabled bool
+
+	// FilesystemBufferSize is the maximum disk space for the fluent-bit file sytem buffer.
+	FilesystemBufferSize *string
+
+	// Loki hostname without subpath
+	Host string
+
+	// Loki TCP port
+	Port string
+
+	//TODO add additional properties to configure Loki
+}

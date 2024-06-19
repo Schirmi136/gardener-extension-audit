@@ -155,6 +155,13 @@ func (a *actuator) applyDefaultBackends(ctx context.Context, log logr.Logger, ba
 		}
 	}
 
+	if a.config.DefaultBackends.Loki != nil && backends.Loki == nil {
+		log.Info(`configuring default backend "loki"`)
+		defaultedBackends.Loki = a.config.DefaultBackends.Loki
+
+		//TODO configure Loki
+	}
+
 	v1alpha1.DefaultBackends(defaultedBackends)
 
 	return defaultedBackends, secrets, nil
@@ -827,6 +834,22 @@ func seedObjects(auditConfig *v1alpha1.AuditConfig, secrets map[string]*corev1.S
 
 		fluentbitConfigMap.Data["splunk.backend.conf"] = fluentbitconfig.Config{
 			Output: []fluentbitconfig.Output{splunkConfig},
+		}.Generate()
+	}
+
+	if pointer.SafeDeref(auditConfig.Backends.Loki).Enabled {
+		lokiConfig := map[string]string{
+			"match":                    "audit",
+			"name":                     "loki",
+			"retry_limit":              "no_limits", // let fluent-bit never discard any data
+			"storage.total_limit_size": pointer.SafeDeref(auditConfig.Backends.Loki.FilesystemBufferSize),
+			"host":                     auditConfig.Backends.Loki.Host,
+			"port":                     auditConfig.Backends.Loki.Port,
+			"event_host":               cluster.ObjectMeta.Name,
+		}
+
+		fluentbitConfigMap.Data["loki.backend.conf"] = fluentbitconfig.Config{
+			Output: []fluentbitconfig.Output{lokiConfig},
 		}.Generate()
 	}
 

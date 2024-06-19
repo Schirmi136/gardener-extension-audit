@@ -70,9 +70,11 @@ type AuditBackends struct {
 	// +optional
 	Splunk *AuditBackendSplunk `json:"splunk,omitempty"`
 
+	// Loki will forward audit data to a Loki service
+	Loki *AuditBackendLoki
+
 	// Possible backends that would be helpful as well:
 	// - Forward
-	// - Loki
 	// - Elasticsearch
 	// - Forward
 	// - Kafka
@@ -119,4 +121,20 @@ type AuditBackendSplunk struct {
 
 	// TlsHost is the hostname that fluent-bit should request through SNI when connecting to a site that serves different hostnames under one IP.
 	TlsHost string `json:"tlshost,omitempty"`
+}
+
+type AuditBackendLoki struct {
+	// Enabled allows to turn this backend on.
+	Enabled bool `json:"enabled"`
+
+	// FilesystemBufferSize is the maximum disk space for the fluent-bit file sytem buffer.
+	FilesystemBufferSize *string `json:"bufferSize,omitempty"`
+
+	// Loki hostname without subpath
+	Host string `json:"host"`
+
+	// Loki TCP port
+	Port string `json:"port"`
+
+	//TODO add additional properties to configure Loki
 }
